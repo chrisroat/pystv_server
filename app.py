@@ -25,7 +25,7 @@ class UploadForm(FlaskForm):
 
 
 @app.route("/", methods=["GET", "POST"])
-def upload():
+def index():
     form = UploadForm()
 
     if request.method == "POST":
