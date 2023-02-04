@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}RCV Tabulator{% endblock %}
+
+{% block content %}
+
+<p>
+    Use RCV Tabulator to run a ranked choice election to determine the winner, understand
+    round-by-round vote counts, and visualize the vote flow in a Sankey diagram.  The
+    <a href="/instructions">Instructions</a> page walks you through running an election
+    with a Google Form and then analyzing the results here.
+</p>
+
+<form method="post" enctype="multipart/form-data" action="/">
+    <div class="mb-3">
+        {{ form.hidden_tag() }}
+        {{ form.results_csv }}
+    </div>
+    <button type="submit" class="btn btn-primary">Analyze</button>
+</form>
+
+{% endblock %}
