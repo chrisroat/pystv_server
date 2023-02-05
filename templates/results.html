@@ -5,39 +5,27 @@
 {% block content %}
 
 <div class="row">
-    <h1>{{ filename }}</h1>
-</div>
-
-{% comment %} {% for question_info in question_infos %}
-<div class="row">
-    <h2>{{ question_info.question }}</h2>
-</div>
-<div class="row m-5">
-    <div class="col-4">
-        <h3>Final Results</h3>
-        <pre>{{ question_info.results.rounds[-1] }}</pre>
-    </div>
     <div class="col">
-        <h3>Results By Round</h3>
-        <pre>{{ question_info.results_by_round }}</pre>
+        <dl>
+            <dt>Filename</dt>
+            <dd>{{ filename }}</dt>
+        </dl>
     </div>
 </div>
 
-<div class="row m-5">
+{% for datum in data %}
+<div class="row m-5 border-top">
     <div class="col">
+        <dl>
+            <dt>Race</dt>
+            <dd>{{ datum.metadata.race_name }}</dd>
+        </dl>
+        <dl>
+            <dt>Winners</dt>
+            <dd>{{ datum.winners | join(', ') }}</dd>
         <div id="fig{{loop.index}}" class="chart"></div>
     </div>
 </div>
-<div class="border-top my-3"></div>
-{% endfor %} {% endcomment %}
-
-{% for sankey_fig in sankey_figs %}
-<div class="row m-5">
-    <div class="col">
-        <div id="fig{{loop.index}}" class="chart"></div>
-    </div>
-</div>
-<div class="border-top my-3"></div>
 {% endfor %}
 
 {% endblock %}
@@ -45,8 +33,8 @@
 {% block scripts %}
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script type="text/javascript">
-    {% for sankey_fig in sankey_figs %}
-    graphs = {{ sankey_fig | safe }};
+    {% for datum in data %}
+    graphs = {{ datum.figure | safe }};
     Plotly.plot('fig{{loop.index}}', graphs, {});
     {% endfor %}
 </script>

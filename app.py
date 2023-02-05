@@ -1,7 +1,8 @@
-import csv
 import io
+import json
 import os
 
+import plotly
 import pystv
 from flask import Flask, render_template, request
 from flask.helpers import send_from_directory
@@ -32,23 +33,28 @@ def index():
         file_storage = form.results_csv.data
         filename = file_storage.filename
 
-        results_txt = io.StringIO(
+        buffer = io.StringIO(
             file_storage.read().decode("latin-1"),
             newline=None,
         )
-        reader = csv.reader(results_txt)
-        rows = [row for row in reader]
-        races = pystv.parse_rows(rows)
-        sankey_figs = []
+        races = pystv.parse_google_form_csv(buffer)
+        data = []
         for race in races:
-            results = pystv.run_stv(race)
-            sankey_data = pystv.results_to_sankey_data(results)
-            fig = pystv.create_sankey_fig(sankey_data)
-            sankey_figs.append(fig)
+            result = pystv.run_stv(race)
+            names = result.metadata.names
+            
+            # -1 because the elected indexing starts from 1.
+            winners = [names[e-1] for r in result.rounds for e in r.elected]
 
-        return render_template(
-            "results.html", filename=filename, sankey_figs=sankey_figs
-        )
+            df_nodes, df_links = pystv.result_to_sankey_data(result)
+            fig = pystv.create_sankey_fig(df_nodes, df_links)
+            fig = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+            data.append(
+                {"metadata": result.metadata, "winners": winners, "figure": fig}
+            )
+
+        return render_template("results.html", filename=filename, data=data)
 
     return render_template("index.html", form=form)
 
